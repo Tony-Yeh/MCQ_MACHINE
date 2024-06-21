@@ -111,6 +111,22 @@
         #backBtn:hover {
             background-color: #0056b3; /* 保留滑鼠懸停時的背景顏色變化 */
         }
+        /* 修改提交按鈕的樣式 */
+        #submit {
+            display: block; /* 使按鈕成為區塊元素 */
+            margin: 20px auto; /* 上下邊距20px，左右自動（使其居中） */
+            padding: 10px 20px; /* 增加內邊距，使按鈕更大 */
+            font-size: 1.2em; /* 增加字體大小 */
+            background-color: #28a745; /* 設定背景顏色 */
+            color: white; /* 文字顏色 */
+            border: none; /* 移除邊框 */
+            border-radius: 10px; /* 圓角邊框 */
+            cursor: pointer; /* 指針形狀 */
+            transition: background-color 0.3s ease; /* 過渡效果 */
+        }
+        #submit:hover {
+            background-color: #218838; /* 滑鼠懸停時的背景顏色 */
+        }
     </style>
 </head>
 <body>
@@ -286,6 +302,8 @@
             if (currentQuestionIndex > 0) {
                 currentQuestionIndex--;
                 loadQuestion();
+                // 更新題數計數器
+                document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
             }
             updateNavigationButtons();
         }
