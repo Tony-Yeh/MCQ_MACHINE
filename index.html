@@ -83,12 +83,12 @@
             position: fixed;
             height: auto; /* 自動調整按鈕高度以適應內容 */
             width: auto; /* 自動調整按鈕寬度以適應內容 */
+            opacity: 0.8; /* 新增透明度設定 */
         }
         #prevBtn {
             left: 20px; /* 定位到左下角 */
             bottom: 20px;
         }
-
         #nextBtn {
             right: 20px; /* 定位到右下角 */
             bottom: 20px;
@@ -172,7 +172,7 @@
         let questions = [];
         let currentQuestionIndex = 0;
         let selectedSubject = '';
-        const years = ['108', '109', '110', '111']; // 可用年份
+        const years = ['108', '109', '110', '111', '112']; // 可用年份
 
         const subjectNames = {
             "testquestions": "測試",
@@ -341,33 +341,41 @@
         }
 
         function loadQuestion() {
-            const resultElement = document.getElementById('result');
-            resultElement.textContent = ''; // 清空結果訊息
-            resultElement.style.color = ''; // 清空結果文字顏色
-            document.getElementById('submit').style.display = 'block'; // 確保進入新題目時顯示提交按鈕
-            document.getElementById('nextBtn').style.display = 'none'; // 確保進入試題時不顯示下一題按鈕
+            const questionData = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = questionData.question;
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            const optionLabels = ['(A) ', '(B) ', '(C) ', '(D) ']; // 新增選項標籤
+            questionData.options.forEach((option, index) => {
+                const choiceItem = document.createElement('li');
+                choiceItem.className = 'choice';
+                choiceItem.innerHTML = `
+                    <input type="radio" name="choice" value="${index}" id="choice${index}">
+                    <label for="choice${index}">${optionLabels[index]}${option}</label>
+                `;
+                choicesContainer.appendChild(choiceItem);
+            });
 
-            if (questions.length > 0) {
-                const questionData = questions[currentQuestionIndex];
-                document.getElementById('question').textContent = questionData.question;
-                const choicesContainer = document.getElementById('choices');
-                choicesContainer.innerHTML = '';
-                const optionLabels = ['(A) ', '(B) ', '(C) ', '(D) ']; // 新增選項標籤
-                questionData.options.forEach((option, index) => {
-                    const choiceItem = document.createElement('li');
-                    choiceItem.className = 'choice';
-                    choiceItem.innerHTML = `
-                        <input type="radio" name="choice" value="${index}" id="choice${index}">
-                        <label for="choice${index}">${optionLabels[index]}${option}</label>
-                    `;
-                    choicesContainer.appendChild(choiceItem);
-                });
+            // 重置結果顯示
+            const resultElement = document.getElementById('result');
+            resultElement.textContent = '';
+            document.getElementById('submit').style.display = 'block'; // 確保進入新題目時顯示提交按鈕
+
+            // 根據是否為最後一題來控制下一題按鈕的顯示
+            if (currentQuestionIndex < questions.length - 1) {
+                document.getElementById('nextBtn').style.display = 'block'; // 如果不是最後一題，顯示下一題按鈕
             } else {
-                document.getElementById('question').textContent = '所有題目都已完成！';
-                document.getElementById('choices').style.display = 'none';
-                document.querySelector('button').style.display = 'none';
+                document.getElementById('nextBtn').style.display = 'none'; // 如果是最後一題，隱藏下一題按鈕
             }
-            updateNavigationButtons(); // 確保每次加載問題時更新導航按鈕
+
+            // 恢復用戶之前的選擇
+            if (questionData.userChoices) {
+                questionData.userChoices.forEach(choiceIndex => {
+                    document.getElementById(`choice${choiceIndex}`).checked = true;
+                });
+                // 重新檢查答案以顯示結果，但僅當用戶已經作答過時
+                checkAnswer();
+            }
         }
 
         function checkAnswer() {
@@ -380,13 +388,15 @@
                     selectedValues.push(parseInt(choice.value, 10));
                 }
             }
+            // 儲存用戶的選擇到題目資料中
+            questionData.userChoices = selectedValues;
+
             const resultElement = document.getElementById('result');
             if (selectedValues.length > 0) {
                 const isCorrect = selectedValues.some(selectedValue => correctAnswers.includes(selectedValue));
                 if (isCorrect) {
                     resultElement.textContent = "恭喜你，答對了！";
                     resultElement.style.color = "green";
-                    // 移除自動跳到下一題的setTimeout部分
                     document.getElementById('submit').style.display = 'none'; // 答對時隱藏提交按鈕
                     document.getElementById('nextBtn').style.display = 'block'; // 顯示下一題按鈕
                 } else {
