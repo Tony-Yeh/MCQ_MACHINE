@@ -1,273 +1,403 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:description" content="一個供司律國考生練習一試的網站" />
-    <meta property="twitter:description" content="一個供司律國考生練習一試的網站" />
-    <title>選擇題練習</title>
-    <link rel="icon" href="image/icon.png" type="image/png">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            background-image: url('image/beach.jpg'); /* 添加背景圖片 */
-            background-size: cover; /* 背景圖片覆蓋整個頁面 */
-            background-position: center; /* 背景圖片居中顯示 */
-        }
-        .year-button {
-            margin: 5px; /* 按鈕間隔設定為5px，您可以根據需要調整 */
-        }
-        .quiz-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .question {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            margin-top: 20px; /* 增加上邊距 */
-        }
-        .choices {
-            list-style-type: none;
-            padding: 0;
-        }
-        .choice {
-            margin-bottom: 10px;
-        }
-        .result {
-            margin-top: 20px;
-            font-size: 1.2em;
-        }
-        .subject-selection {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .subject-selection button {
-            margin: 10px 0;
-        }
-        .subject-name {
-            font-size: 1.5em;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #question-count {
-            margin-bottom: 20px; /* 增加下邊距 */
-        }
-        .countdown-container {
-            display: flex; /* 使內部元素水平排列 */
-            justify-content: center; /* 水平居中 */
-            font-size: 0.8em; /* 縮小字體大小 */
-        }
-        .countdown-container h2 {
-            margin: 0 10px; /* 保留原有的間隔設定 */
-            font-size: 1.2em; /* 將字體大小調整為更小 */
-        }
-        #prevBtn, #nextBtn {
-            padding: 7px 14px; /* 增加內邊距，使按鈕變大 */
-            font-size: 1.0; /* 增加字體大小 */
-            background-color: #007bff; /* 背景顏色 */
-            color: white; /* 文字顏色 */
-            border: none; /* 邊框設定 */
-            border-radius: 7px; /* 增加圓角 */
-            cursor: pointer; /* 指針形狀 */
-            transition: background-color 0.3s ease; /* 過渡效果 */
-            position: fixed;
-            height: auto; /* 自動調整按鈕高度以適應內容 */
-            width: auto; /* 自動調整按鈕寬度以適應內容 */
-            opacity: 0.8; /* 新增透明度設定 */
-        }
-        #prevBtn {
-            left: 20px; /* 定位到左下角 */
-            bottom: 20px;
-        }
-        #nextBtn {
-            right: 20px; /* 定位到右下角 */
-            bottom: 20px;
-        }
-        #backBtn {
-            padding: 5px 15px; /* 控制內邊距 */
-            font-size: 1em; /* 控制字體大小 */
-            background-color: #007bff; /* 背景顏色 */
-            color: white; /* 文字顏色 */
-            border: none; /* 邊框設定 */
-            border-radius: 5px; /* 圓角設定 */
-            cursor: pointer; /* 指針形狀 */
-            transition: background-color 0.3s ease; /* 過渡效果 */
-            position: fixed;
-            right: 0px;
-            top: 5px; /* 定位到右上角 */
-            height: 40px; /* 明確設定按鈕高度 */
-            width: auto; /* 自動調整按鈕寬度以適應內容 */
-        }
-        #backBtn:hover {
-            background-color: #0056b3; /* 保留滑鼠懸停時的背景顏色變化 */
-        }
-        /* 修改提交按鈕的樣式 */
-        #submit {
-            display: block; /* 使按鈕成為區塊元素 */
-            margin: 20px auto; /* 上下邊距20px，左右自動（使其居中） */
-            padding: 10px 20px; /* 增加內邊距，使按鈕更大 */
-            font-size: 1.2em; /* 增加字體大小 */
-            background-color: #28a745; /* 設定背景顏色 */
-            color: white; /* 文字顏色 */
-            border: none; /* 移除邊框 */
-            border-radius: 10px; /* 圓角邊框 */
-            cursor: pointer; /* 指針形狀 */
-            transition: background-color 0.3s ease; /* 過渡效果 */
-        }
-        #submit:hover {
-            background-color: #218838; /* 滑鼠懸停時的背景顏色 */
-        }
-    </style>
-</head>
-<body>
-    <div class="quiz-container" id="subject-container">
-        <div class="countdown-container">
-            <h2>一試倒數：<span id="countdown1"></span>天</h2>
-            <h2>二試倒數：<span id="countdown2"></span>天</h2>
-        </div>
-        <div class="subject-selection">
-            <h2>請選擇練習的科目：</h2>
-            <button onclick="loadSubjectForTest('testquestions')">測試</button>
-            <button onclick="loadSubject('GenLawI_CAIP')">綜合法學(一) （憲法、行政法、國際公法、國際私法）</button>
-            <button onclick="loadSubject('GenLawI_CCE')">綜合法學(一) （刑法、刑事訴訟法、法律倫理）</button>
-            <button onclick="loadSubject('GenLawII_CP')">綜合法學(二) （民法、民事訴訟法）</button>
-            <button onclick="loadSubject('GenLawII_CIBSE')">綜合法學(二) （公司法、保險法、票據法、證券交易法、強制執行法、法學英文）</button>
-            <!-- 可以根據需要添加更多科目 -->
-        </div>
-    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta property="og:description" content="一個供司律國考生練習一試的網站" />
+		<meta property="twitter:description" content="一個供司律國考生練習一試的網站" />
+		<title>選擇題練習</title>
+		<link rel="icon" href="image/icon.png" type="image/png" />
+		<style>
+			body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #f4f4f4;
+                background-image: url('image/beach.jpg');
+                background-size: cover;
+                background-position: center;
+			}
+			.select-text {
+                font-weight: normal;
+                line-height: 2.2;
+			}
+			.year-selection {
+                background-color: #f7f7f7;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            .year-button {
+                margin: 5px;
+                padding: 8px 20px;
+                font-size: 1em;
+                background-color: #e7e7e7;
+                color: #333;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .year-button:hover {
+                background-color: #d7d7d7;
+            }
+			#selected-subject {
+                font-weight: bold;
+			}
+			#subject-name {
+                font-weight: bold;
+			}
+			.quiz-container {
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+			.question {
+                font-size: 1.2em;
+                margin-bottom: 20px;
+                margin-top: 20px;
+			}
+			.choices {
+                list-style-type: none;
+                padding: 0;
+			}
+			.choice {
+                margin-bottom: 10px;
+			}
+			.result {
+                margin-top: 20px;
+                font-size: 1.2em;
+			}
+			.subject-selection {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            .subject-selection button {
+                margin: 5px 0;
+                padding: 8px 20px;
+                font-size: 1em;
+                background-color: #e7e7e7;
+                color: #333;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                width: 350px;
+                text-align: center;
+            }
+            .subject-selection button:hover {
+                background-color: #d7d7d7;
+            }
+            .subject-selection button:first-child {
+                margin-top: 0;
+            }
+            .subject-selection button:last-child {
+                margin-bottom: 0;
+            }
+			.subject-name {
+                font-size: 1.5em;
+                text-align: center;
+                margin-bottom: 20px;
+			}
+			#question-count {
+                margin-bottom: 20px;
+			}
+			.countdown-container {
+                display: flex;
+                justify-content: center;
+                font-size: 0.8em;
+			}
+			.countdown-container h2 {
+                margin: 0 10px;
+                font-size: 1.2em;
+			}
+			#prevBtn, #nextBtn {
+                padding: 12px 24px;
+                font-size: 1em;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 7px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                position: fixed;
+                height: auto;
+                width: auto;
+                opacity: 0.8;
+			}
+			#prevBtn {
+                left: 20px;
+                bottom: 20px;
+			}
+			#nextBtn {
+                right: 20px;
+                bottom: 20px;
+			}
+			#backBtn {
+                padding: 5px 15px;
+                font-size: 1em;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                position: fixed;
+                right: 0px;
+                top: 5px;
+                height: 40px;
+                width: auto;
+			}
+			#backBtn:hover {
+                background-color: #0056b3;
+			}
+			.choice label {
+                display: block;
+                background-color: #f9f9f9;
+                padding: 10px;
+                margin-bottom: 5px;
+                border: 2px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease, border-color 0.3s ease;
+			}
 
-    <div class="quiz-container" id="year-container" style="display: none;">
-        <div class="year-selection">
-            <h2>請選擇年份：</h2>
-            <div id="year-buttons"><!-- 年份按鈕將動態生成並放在這裡 --></div>
-        </div>
-    </div>
+			.choice input[type="radio"] {
+                display: none;
+			}
 
-    <div class="quiz-container" id="quiz-container" style="display: none;">
-        <div id="subject-name" class="subject-name">科目名稱</div>
-        <div id="question-count">題數：0 / 0</div>
-        <div class="question" id="question">這裡是題目內容，請選擇一個答案：</div>
-        <ul class="choices" id="choices">
-            <!-- 選項會由JavaScript動態生成 -->
-        </ul>
-        <button id="submit" onclick="checkAnswer()">提交答案</button>
-        <div class="result" id="result"></div>
-    </div>
+			.choice input[type="radio"]:checked + label {
+                background-color: #d5dfe9;
+                border-color: #a2b1c2;
+			}
 
-    <button id="backBtn" style="display: none; position: fixed; right: 20px; bottom: 20px;">回到上一頁</button>
-    <button id="prevBtn" style="display: none; position: fixed; left: 20px; bottom: 20px;" onclick="loadPreviousQuestion()">上一題</button>
-    <button id="nextBtn" style="display: none; position: fixed; right: 20px; bottom: 20px;" onclick="loadNextQuestion()">下一題</button>
+			.choice label:hover {
+                background-color: #e9ecef;
+			}
+			#submit {
+                display: block;
+                margin: 20px auto;
+                padding: 10px 20px;
+                font-size: 1.2em;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+			}
+			#submit:hover {
+                background-color: #218838;
+			}
 
-    <script>
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let selectedSubject = '';
-        const years = ['108', '109', '110', '111', '112']; // 可用年份
+			#result {
+                text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="quiz-container" id="subject-container">
+			<div class="countdown-container">
+				<h2>①①③司律一試倒數：<span id="countdown1"></span></h2>
+				<h2>二試倒數：<span id="countdown2"></span></h2>
+			</div>
+			<div class="subject-selection">
+				<h2>征服司律國考一試練習機器</h2>
+				<div class="select-text">請選擇練習的科目：</div>
+				<button onclick="loadSubjectForTest('testquestions')">測試</button>
+				<button onclick="loadSubject('GenLawI_CAIP')">綜合法學(一) （憲法、行政法、國際公法、國際私法）</button>
+				<button onclick="loadSubject('GenLawI_CCE')">綜合法學(一) （刑法、刑事訴訟法、法律倫理）</button>
+				<button onclick="loadSubject('GenLawII_CP')">綜合法學(二) （民法、民事訴訟法）</button>
+				<button onclick="loadSubject('GenLawII_CIBSE')">綜合法學(二) （公司法、保險法、票據法、證券交易法、強制執行法、法學英文）</button>
+			</div>
+		</div>
 
-        const subjectNames = {
-            "testquestions": "測試",
-            "GenLawI_CAIP": "綜合法學(一) （憲法、行政法、國際公法、國際私法）",
-            "GenLawI_CCE": "綜合法學(一) （刑法、刑事訴訟法、法律倫理）",
-            "GenLawII_CP": "綜合法學(二) （民法、民事訴訟法）",
-            "GenLawII_CIBSE": "綜合法學(二) （公司法、保險法、票據法、證券交易法、強制執行法、法學英文）",
-            // 可以根據需要添加更多科目
-        };
+		<div class="quiz-container" id="year-container" style="display: none;">
+			<div class="year-selection">
+				<div id="selected-subject" class="subject-name"></div>
+				<div class="select-text">請選擇年份：</div>
+				<div id="year-buttons"><!-- 生成年份按鈕 --></div>
+			</div>
+		</div>
 
-        // 新增函數來計算倒數天數
-        function calculateCountdown() {
-            const now = new Date();
-            const firstExamDate = new Date(now.getFullYear(), 7, 3); // 113年8月3日，月份從0開始計算
-            const secondExamDate = new Date(now.getFullYear(), 9, 19); // 113年10月19日
+		<div class="quiz-container" id="quiz-container" style="display: none;">
+			<div id="subject-name" class="subject-name">科目名稱</div>
+			<div id="question-count">題數：0 / 0</div>
+			<div class="question" id="question">這裡是題目內容，請選擇一個答案：</div>
+			<ul class="choices" id="choices">
+				<!-- 生成選項 -->
+			</ul>
+			<button id="submit" onclick="checkAnswer()">提交答案</button>
+			<div class="result" id="result"></div>
+		</div>
 
-            // 計算倒數天數
-            const countdown1 = Math.ceil((firstExamDate - now) / (1000 * 60 * 60 * 24));
-            const countdown2 = Math.ceil((secondExamDate - now) / (1000 * 60 * 60 * 24));
+		<button id="backBtn" style="display: none; position: fixed; right: 20px; bottom: 20px;">回到上一頁</button>
+		<button id="prevBtn" style="display: none; position: fixed; left: 20px; bottom: 20px;" onclick="loadPreviousQuestion()">上一題</button>
+		<button id="nextBtn" style="display: none; position: fixed; right: 20px; bottom: 20px;" onclick="loadNextQuestion()">下一題</button>
 
-            // 更新 HTML 元素
-            document.getElementById('countdown1').textContent = countdown1 >= 0 ? countdown1 : "已過期";
-            document.getElementById('countdown2').textContent = countdown2 >= 0 ? countdown2 : "已過期";
-        }
+		<script>
+			let questions = [];
+			let currentQuestionIndex = 0;
+			let selectedSubject = '';
 
-        // 確保頁面加載完成後執行
-        document.addEventListener('DOMContentLoaded', function() {
-            calculateCountdown();
-        });
+			const years = ['108', '109', '110', '111', '112'];
 
-        function loadSubjectForTest(subject) {
-            fetch(`question/${subject}.json`)
+			const subjectNames = {
+                "testquestions": "測試",
+                "GenLawI_CAIP": "綜合法學(一) （憲法、行政法、國際公法、國際私法）",
+                "GenLawI_CCE": "綜合法學(一) （刑法、刑事訴訟法、法律倫理）",
+                "GenLawII_CP": "綜合法學(二) （民法、民事訴訟法）",
+                "GenLawII_CIBSE": "綜合法學(二) （公司法、保險法、票據法、證券交易法、強制執行法、法學英文）"
+			};
+
+			function calculateCountdown() {
+                const now = new Date();
+                const firstExamDate = new Date(now.getFullYear(), 7, 3); // 一試日期： 113年8月3日（月份從0開始計算）
+                const secondExamDate = new Date(now.getFullYear(), 9, 19); // 二試日期：113年10月19,20日
+
+                const countdown1 = Math.ceil((firstExamDate - now) / (1000 * 60 * 60 * 24));
+                const countdown2 = Math.ceil((secondExamDate - now) / (1000 * 60 * 60 * 24));
+
+                document.getElementById('countdown1').textContent = countdown1 >= 0 ? countdown1 + "天" : "已結束";
+                document.getElementById('countdown2').textContent = countdown2 >= 0 ? countdown2 + "天" : "已結束";
+			}
+
+			document.addEventListener('DOMContentLoaded', function() {
+                calculateCountdown();
+			});
+
+			document.addEventListener('keydown', function(event) {
+                const quizContainer = document.getElementById('quiz-container');
+                const choices = document.getElementsByName('choice');
+                if (quizContainer.style.display === 'block') {
+                    if (event.key === 'ArrowRight') {
+                        loadNextQuestion();
+                    } else if (event.key === 'ArrowLeft') {
+                        loadPreviousQuestion();
+                    } else if (event.key === 'Enter') {
+                        checkAnswer();
+                    } else if (choices[0].disabled == false && event.key === 'ArrowUp') {
+                        const selectedOptions = document.querySelectorAll('input[name="choice"]:checked');
+                        if (selectedOptions.length === 0) {
+                            document.getElementById('choice0').checked = true;
+                        }
+                        else {
+                            if (document.getElementById('choice0').checked) {
+                                document.getElementById('choice0').checked = false;
+                                document.getElementById('choice3').checked = true;
+                            } else if (document.getElementById('choice1').checked) {
+                                document.getElementById('choice1').checked = false;
+                                document.getElementById('choice0').checked = true;
+                            } else if (document.getElementById('choice2').checked) {
+                                document.getElementById('choice2').checked = false;
+                                document.getElementById('choice1').checked = true;
+                            } else if (document.getElementById('choice3').checked) {
+                                document.getElementById('choice3').checked = false;
+                                document.getElementById('choice2').checked = true;
+                            }
+                        }
+                    } else if (choices[0].disabled == false && event.key === 'ArrowDown') {
+                        const selectedOptions = document.querySelectorAll('input[name="choice"]:checked');
+                        if (selectedOptions.length === 0) {
+                            const lastOptionIndex = document.getElementsByName('choice').length - 1;
+                            document.getElementById(`choice${lastOptionIndex}`).checked = true;
+                        }
+                        else {
+                            if (document.getElementById('choice0').checked) {
+                                document.getElementById('choice0').checked = false;
+                                document.getElementById('choice1').checked = true;
+                            } else if (document.getElementById('choice1').checked) {
+                                document.getElementById('choice1').checked = false;
+                                document.getElementById('choice2').checked = true;
+                            } else if (document.getElementById('choice2').checked) {
+                                document.getElementById('choice2').checked = false;
+                                document.getElementById('choice3').checked = true;
+                            } else if (document.getElementById('choice3').checked) {
+                                document.getElementById('choice3').checked = false;
+                                document.getElementById('choice0').checked = true;
+                            }
+                        }
+                    }
+                }
+			});
+
+			function loadSubjectForTest(subject) {
+                fetch(`question/${subject}.json`)
                 .then(response => response.json())
                 .then(data => {
                     questions = data;
-                    shuffleArray(questions); // 洗牌
+                    shuffleArray(questions); // 題序隨機打亂，不按照原本試題的順序出題
                     currentQuestionIndex = 0;
                     document.getElementById('subject-container').style.display = 'none';
                     document.getElementById('quiz-container').style.display = 'block';
-                    // 使用映射表來獲取友好的科目名稱
-                    const friendlyName = subjectNames[subject] || "未知科目"; // 如果找不到對應的名稱，則顯示"未知科目"
-                    document.getElementById('subject-name').textContent = friendlyName; // 設定科目名稱
+
+                    const friendlyName = subjectNames[subject] || "未知科目";
+                    document.getElementById('subject-name').textContent = friendlyName;
                     document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
                     loadQuestion();
                 })
                 .catch(error => console.error('Error loading questions:', error));
-        }
+			}
 
-        function loadSubject(subject) {
-            document.getElementById('backBtn').style.display = 'block'; // 顯示回到上一頁按鈕
-            document.getElementById('backBtn').onclick = function() {
-                document.getElementById('subject-container').style.display = 'block';
-                document.getElementById('year-container').style.display = 'none';
-                document.getElementById('backBtn').style.display = 'none'; // 隱藏回到上一頁按鈕
-                // 新增代碼：隱藏“上一題”和“下一題”按鈕
-                document.getElementById('prevBtn').style.display = 'none';
-                document.getElementById('nextBtn').style.display = 'none';
-            };
+			function loadSubject(subject) {
+                document.getElementById('backBtn').style.display = 'block'; // 顯示回到上一頁按鈕
+                document.getElementById('backBtn').onclick = function() {
+                    document.getElementById('subject-container').style.display = 'block';
+                    document.getElementById('year-container').style.display = 'none';
+                    document.getElementById('quiz-container').style.display = 'none';
+                    document.getElementById('backBtn').style.display = 'none'; // 隱藏回到上一頁按鈕
+                    // 隱藏“上一題”和“下一題”按鈕
+                    document.getElementById('prevBtn').style.display = 'none';
+                    document.getElementById('nextBtn').style.display = 'none';
+                };
 
-            selectedSubject = subject; // 儲存選擇的科目
-            document.getElementById('subject-container').style.display = 'none';
-            document.getElementById('year-container').style.display = 'block';
-            generateYearButtons(); // 生成年份按鈕
-        }
+                selectedSubject = subject; // 儲存選擇的科目
+                document.getElementById('subject-container').style.display = 'none';
+                document.getElementById('year-container').style.display = 'block';
+                generateYearButtons();
 
-        function generateYearButtons() {
-            const container = document.getElementById('year-buttons');
-            // 清除之前的年份按鈕
-            container.innerHTML = '';
-            years.forEach(year => {
-                const button = document.createElement('button');
-                button.textContent = year + '年';
-                button.className = 'year-button'; // 為按鈕添加新的CSS類別
-                button.onclick = () => loadYearQuestions(year);
-                container.appendChild(button);
-            });
-        }
+                // 顯示當前已選擇的科目名稱
+                const friendlyName = subjectNames[subject] || "未知科目";
+                document.getElementById('selected-subject').textContent = friendlyName; // 新增這行
+			}
 
-        function showBackButtonForYearSelection() {
-            document.getElementById('backBtn').style.display = 'block'; // 顯示回到上一頁按鈕
-            document.getElementById('backBtn').onclick = function() {
-                document.getElementById('subject-container').style.display = 'block';
-                document.getElementById('year-container').style.display = 'none';
-                document.getElementById('quiz-container').style.display = 'none';
-                document.getElementById('backBtn').style.display = 'none'; // 隱藏回到上一頁按鈕
-            };
-        }
+			function generateYearButtons() {
+                const container = document.getElementById('year-buttons');
+                container.innerHTML = '';
+                years.forEach(year => {
+                    const button = document.createElement('button');
+                    button.textContent = year + '年';
+                    button.className = 'year-button';
+                    button.onclick = () => loadYearQuestions(year);
+                    container.appendChild(button);
+                });
+			}
 
-        function loadYearQuestions(year) {
-            const subjectFile = `${selectedSubject}_${year}.json`; // 根據選擇的科目和年份生成檔案名稱
-            fetch(`question/${subjectFile}`)
+			function showBackButtonForYearSelection() {
+                document.getElementById('backBtn').style.display = 'block'; // 顯示回到上一頁按鈕
+                document.getElementById('backBtn').onclick = function() {
+                    document.getElementById('subject-container').style.display = 'block';
+                    document.getElementById('year-container').style.display = 'none';
+                    document.getElementById('quiz-container').style.display = 'none';
+                    document.getElementById('backBtn').style.display = 'none'; // 隱藏回到上一頁按鈕
+                };
+			}
+
+			function loadYearQuestions(year) {
+                const subjectFile = `${selectedSubject}_${year}.json`;
+                fetch(`question/${subjectFile}`)
                 .then(response => response.json())
                 .then(data => {
                     questions = data;
-                    shuffleArray(questions); // 洗牌
+                    shuffleArray(questions); // 題序隨機打亂，不按照原本試題的順序出題
                     currentQuestionIndex = 0;
                     document.getElementById('subject-container').style.display = 'none';
                     document.getElementById('year-container').style.display = 'none';
@@ -278,53 +408,50 @@
                         document.getElementById('year-container').style.display = 'block';
                         document.getElementById('quiz-container').style.display = 'none';
                         showBackButtonForYearSelection(); // 確保在返回選擇年份頁面時顯示並設置回到上一頁按鈕
-                        // 新增代碼：隱藏“上一題”和“下一題”按鈕
                         document.getElementById('prevBtn').style.display = 'none';
                         document.getElementById('nextBtn').style.display = 'none';
                     };
-                    // 使用映射表來獲取友好的科目名稱
-                    const friendlyName = subjectNames[selectedSubject] || "未知科目"; // 如果找不到對應的名稱，則顯示"未知科目"
-                    document.getElementById('subject-name').textContent = `${year}年 ${friendlyName}`; // 在科目名稱前加上年份
+                    const friendlyName = subjectNames[selectedSubject] || "未知科目";
+                    document.getElementById('subject-name').textContent = `${year}年 ${friendlyName}`;
                     document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
                     loadQuestion();
                 })
                 .catch(error => console.error('Error loading questions:', error));
-        }
+			}
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+			function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+			}
 
-        function loadPreviousQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                loadQuestion();
-                // 更新題數計數器
-                document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
-            }
-            updateNavigationButtons();
-        }
+			function loadPreviousQuestion() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    loadQuestion();
+                    document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
+                }
+                updateNavigationButtons();
+			}
 
-        function updateNavigationButtons() {
-            // 更新“上一題”按鈕的顯示狀態
-            if (currentQuestionIndex > 0) {
-                document.getElementById('prevBtn').style.display = 'block';
-            } else {
-                document.getElementById('prevBtn').style.display = 'none';
-            }
-            // 更新“下一題”或“完成”按鈕的顯示狀態
-            if (currentQuestionIndex < questions.length - 1) {
-                document.getElementById('nextBtn').style.display = 'block';
-                document.getElementById('nextBtn').textContent = '下一題'; // 確保按鈕文本正確
-                document.getElementById('nextBtn').onclick = loadNextQuestion; // 確保按鈕功能正確
-            } else if (currentQuestionIndex === questions.length - 1) {
-                document.getElementById('nextBtn').style.display = 'block';
-                document.getElementById('nextBtn').textContent = '完成'; // 更改按鈕文本為“完成”
-                // 修改按鈕功能，導回選擇科目頁面
-                document.getElementById('nextBtn').onclick = function() {
+			function updateNavigationButtons() {
+                // 更新“上一題”按鈕的顯示狀態
+                if (currentQuestionIndex > 0) {
+                    document.getElementById('prevBtn').style.display = 'block';
+                } else {
+                    document.getElementById('prevBtn').style.display = 'none';
+                }
+                // 更新“下一題”或“完成”按鈕的顯示狀態
+                if (currentQuestionIndex < questions.length - 1) {
+                    document.getElementById('nextBtn').style.display = 'block';
+                    document.getElementById('nextBtn').textContent = '下一題';
+                    document.getElementById('nextBtn').onclick = loadNextQuestion;
+                } else if (currentQuestionIndex === questions.length - 1) {
+                    document.getElementById('nextBtn').style.display = 'block';
+                    document.getElementById('nextBtn').textContent = '完成';
+                    // 修改按鈕功能，導回選擇科目頁面
+                    document.getElementById('nextBtn').onclick = function() {
                     document.getElementById('quiz-container').style.display = 'none';
                     document.getElementById('subject-container').style.display = 'block';
                     document.getElementById('backBtn').style.display = 'none'; // 隱藏回到上一頁按鈕
@@ -334,109 +461,127 @@
                     // 重置按鈕文本和事件以供下次使用
                     document.getElementById('nextBtn').textContent = '下一題';
                     document.getElementById('nextBtn').onclick = loadNextQuestion;
-                };
-            } else {
-                document.getElementById('nextBtn').style.display = 'none';
-            }
-        }
+                    };
+                } else {
+                    document.getElementById('nextBtn').style.display = 'none';
+                }
+			}
 
-        function loadQuestion() {
-            const questionData = questions[currentQuestionIndex];
-            document.getElementById('question').textContent = questionData.question;
-            const choicesContainer = document.getElementById('choices');
-            choicesContainer.innerHTML = '';
-            const optionLabels = ['(A) ', '(B) ', '(C) ', '(D) ']; // 新增選項標籤
-            questionData.options.forEach((option, index) => {
-                const choiceItem = document.createElement('li');
-                choiceItem.className = 'choice';
-                choiceItem.innerHTML = `
+			function loadQuestion() {
+                const questionData = questions[currentQuestionIndex];
+                document.getElementById('question').textContent = questionData.question;
+                const choicesContainer = document.getElementById('choices');
+                choicesContainer.innerHTML = '';
+                const optionLabels = ['(A) ', '(B) ', '(C) ', '(D) ']; // 新增選項標籤
+                questionData.options.forEach((option, index) => {
+                    const choiceItem = document.createElement('li');
+                    choiceItem.className = 'choice';
+                    choiceItem.innerHTML = `
                     <input type="radio" name="choice" value="${index}" id="choice${index}">
                     <label for="choice${index}">${optionLabels[index]}${option}</label>
-                `;
-                choicesContainer.appendChild(choiceItem);
-            });
-
-            // 重置結果顯示
-            const resultElement = document.getElementById('result');
-            resultElement.textContent = '';
-            document.getElementById('submit').style.display = 'block'; // 確保進入新題目時顯示提交按鈕
-
-            // 根據是否為最後一題來控制下一題按鈕的顯示
-            if (currentQuestionIndex < questions.length - 1) {
-                document.getElementById('nextBtn').style.display = 'block'; // 如果不是最後一題，顯示下一題按鈕
-            } else {
-                document.getElementById('nextBtn').style.display = 'none'; // 如果是最後一題，隱藏下一題按鈕
-            }
-
-            // 恢復用戶之前的選擇
-            if (questionData.userChoices) {
-                questionData.userChoices.forEach(choiceIndex => {
-                    document.getElementById(`choice${choiceIndex}`).checked = true;
+                    `;
+                    choicesContainer.appendChild(choiceItem);
                 });
-                // 重新檢查答案以顯示結果，但僅當用戶已經作答過時
-                checkAnswer();
-            }
-        }
 
-        function checkAnswer() {
-            const questionData = questions[currentQuestionIndex];
-            const correctAnswers = Array.isArray(questionData.answer_index) ? questionData.answer_index : [questionData.answer_index];
-            const choices = document.getElementsByName('choice');
-            let selectedValues = [];
-            for (const choice of choices) {
-                if (choice.checked) {
-                    selectedValues.push(parseInt(choice.value, 10));
-                }
-            }
-            // 儲存用戶的選擇到題目資料中
-            questionData.userChoices = selectedValues;
+                // 重置結果顯示
+                const resultElement = document.getElementById('result');
+                resultElement.textContent = '';
+                document.getElementById('submit').style.display = 'block'; // 確保進入新題目時顯示提交按鈕
 
-            const resultElement = document.getElementById('result');
-            if (selectedValues.length > 0) {
-                const isCorrect = selectedValues.some(selectedValue => correctAnswers.includes(selectedValue));
-                if (isCorrect) {
-                    resultElement.textContent = "恭喜你，答對了！";
-                    resultElement.style.color = "green";
-                    document.getElementById('submit').style.display = 'none'; // 答對時隱藏提交按鈕
-                    document.getElementById('nextBtn').style.display = 'block'; // 顯示下一題按鈕
+                // 根據是否為最後一題來控制下一題按鈕的顯示
+                if (currentQuestionIndex < questions.length - 1) {
+                    document.getElementById('nextBtn').style.display = 'block'; // 如果不是最後一題，顯示下一題按鈕
                 } else {
-                    const optionLabels = ['(A) ', '(B) ', '(C) ', '(D) ']; // 新增選項標籤
-                    resultElement.textContent = "答錯了，正確答案是：" + correctAnswers.map(index => optionLabels[index] + questionData.options[index]).join(" 或 ");
-                    resultElement.style.color = "red";
-                    document.getElementById('submit').style.display = 'none'; // 答錯時隱藏提交按鈕
-                    document.getElementById('nextBtn').style.display = 'block'; // 顯示下一題按鈕
+                    document.getElementById('nextBtn').style.display = 'none'; // 如果是最後一題，隱藏下一題按鈕
                 }
-            } else {
-                resultElement.textContent = "請選擇一個答案。";
-                resultElement.style.color = "orange";
-            }
-        }
 
-        function loadNextQuestion() {
-            if (currentQuestionIndex >= questions.length - 1) {
-                // 當達到最後一題時，更改按鈕文本為“完成”並設置其功能
-                document.getElementById('nextBtn').textContent = '完成';
-                document.getElementById('nextBtn').onclick = function() {
-                    // 將用戶導回選擇科目的頁面
-                    document.getElementById('quiz-container').style.display = 'none';
-                    document.getElementById('subject-container').style.display = 'block';
-                    document.getElementById('backBtn').style.display = 'none'; // 隱藏回到上一頁按鈕
-                    // 隱藏“上一題”和“下一題”按鈕
-                    document.getElementById('prevBtn').style.display = 'none';
-                    document.getElementById('nextBtn').style.display = 'none';
-                    // 重置按鈕文本和事件以供下次使用
-                    document.getElementById('nextBtn').textContent = '下一題';
-                    document.getElementById('nextBtn').onclick = loadNextQuestion;
-                };
-            } else {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < questions.length) {
-                    document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
-                    loadQuestion();
+                // 恢復用戶之前的選擇
+                if (questionData.userChoices) {
+                    questionData.userChoices.forEach(choiceIndex => {
+                        document.getElementById(`choice${choiceIndex}`).checked = true;
+                    });
+                    // 重新檢查答案以顯示結果，但僅當用戶已經作答過時
+                    checkAnswer();
                 }
-            }
-            updateNavigationButtons(); // 確保每次加載下一題時更新導航按鈕
-        }
-    </script>
-</body>
+			}
+
+			function checkAnswer() {
+                const questionData = questions[currentQuestionIndex];
+                const correctAnswers = Array.isArray(questionData.answer_index) ? questionData.answer_index : [questionData.answer_index];
+                const choices = document.getElementsByName('choice');
+                let selectedValues = [];
+                for (const choice of choices) {
+                    if (choice.checked) {
+                        selectedValues.push(parseInt(choice.value, 10));
+                    }
+                }
+                // 儲存用戶的選擇到題目資料中
+                questionData.userChoices = selectedValues;
+
+                const resultElement = document.getElementById('result');
+                if (selectedValues.length > 0) {
+                    // 當用戶選擇了至少一個選項時，禁用所有選項按鈕
+                    for (const choice of choices) {
+                        choice.disabled = true;
+                    }
+
+                    const isCorrect = selectedValues.some(selectedValue => correctAnswers.includes(selectedValue));
+                    if (isCorrect) {
+                        resultElement.textContent = "恭喜你，答對了！";
+                        resultElement.style.color = "green";
+                        document.getElementById('submit').style.display = 'none'; // 答對時隱藏提交按鈕
+                        document.getElementById('nextBtn').style.display = 'block'; // 顯示下一題按鈕
+                    } else {
+                        const optionLabels = ['(A) ', '(B) ', '(C) ', '(D) ']; // 新增選項標籤
+                        resultElement.textContent = "答錯了，正解：" + correctAnswers.map(index => optionLabels[index]).join(" 或 ");
+                        resultElement.style.color = "red";
+                        document.getElementById('submit').style.display = 'none'; // 答錯時隱藏提交按鈕
+                        document.getElementById('nextBtn').style.display = 'block'; // 顯示下一題按鈕
+                    }
+                    // 標示正確答案為綠色，錯誤答案為紅色
+                    correctAnswers.forEach(index => {
+                        const label = document.querySelector(`label[for="choice${index}"]`);
+                        if (!label.innerHTML.includes('✔️')) {
+                            label.style.backgroundColor = "#d4edda"; // 正確答案背景色
+                            label.innerHTML = `<span style="color: green;">✔️</span> ${label.innerHTML}`;
+                        }
+                    });
+                    selectedValues.forEach(index => {
+                        const label = document.querySelector(`label[for="choice${index}"]`);
+                        if (!correctAnswers.includes(index)) {
+                            if (!label.innerHTML.includes('❌')) {
+                                label.style.backgroundColor = "#f8d7da"; // 錯誤答案背景色
+                                label.innerHTML = `<span style="color: red;">❌</span> ${label.innerHTML}`;
+                            }
+                        }
+                    });
+                } else {
+                    resultElement.textContent = "請選擇一個答案。";
+                    resultElement.style.color = "orange";
+                }
+			}
+
+			function loadNextQuestion() {
+                if (currentQuestionIndex >= questions.length - 1) {
+                    document.getElementById('nextBtn').textContent = '完成';
+                    document.getElementById('nextBtn').onclick = function() {
+                        document.getElementById('quiz-container').style.display = 'none';
+                        document.getElementById('subject-container').style.display = 'block';
+                        document.getElementById('backBtn').style.display = 'none';
+                        document.getElementById('prevBtn').style.display = 'none';
+                        document.getElementById('nextBtn').style.display = 'none';
+                        document.getElementById('nextBtn').textContent = '下一題';
+                        document.getElementById('nextBtn').onclick = loadNextQuestion;
+                    };
+                } else {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questions.length) {
+                        document.getElementById('question-count').textContent = `題數：${currentQuestionIndex + 1} / ${questions.length}`;
+                        loadQuestion();
+                    }
+                }
+                updateNavigationButtons();
+			}
+		</script>
+	</body>
 </html>
